@@ -38,7 +38,7 @@ app.use((err, req, res, next) => {
   res.status(500).send('Internal server error');
 });
 
-const PORT = parseInt(process.env.PORT || '3000', 10);
+const PORT = parseInt(process.env.PORT || '5500', 10);
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`[server] listening on :${PORT}`);
   scheduler.start();

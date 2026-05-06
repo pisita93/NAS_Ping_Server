@@ -24,7 +24,7 @@ npm install
 npm start
 ```
 
-Open <http://localhost:3000> and sign in with the admin credentials from `.env`.
+Open <http://localhost:5500> and sign in with the admin credentials from `.env`.
 
 ## Deploy on Synology via Portainer
 
@@ -59,7 +59,7 @@ git clone https://github.com/<you>/NAS_Ping_Server.git app
 In `/volume1/docker/nas-ping-server/app/.env`:
 
 ```env
-TZ=Europe/Madrid
+TZ=Asia/Bangkok
 SESSION_SECRET=<long random string>
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=<choose one — only used on first boot>
@@ -73,7 +73,7 @@ NOTIFY_FROM=NAS Ping Server <your.address@gmail.com>
 NOTIFY_TO=your.address@gmail.com
 NOTIFY_FAILURE_THRESHOLD=2
 
-PUBLIC_URL=http://nas.local:3000
+PUBLIC_URL=http://nas.local:5500
 ```
 
 > **Gmail app password**: with 2-Step Verification enabled, generate one at
@@ -107,7 +107,7 @@ PUBLIC_URL=http://nas.local:3000
      ```
      then change the compose file to `image: nas-ping-server:local`.
 
-7. **Deploy the stack.** Browse to `http://<nas-ip>:3000` and log in.
+7. **Deploy the stack.** Browse to `http://<nas-ip>:5500` and log in.
 
 ### 5. (Optional) Reverse proxy with HTTPS
 
@@ -133,7 +133,8 @@ interval keeps them awake comfortably.
 
 | Variable                   | Default              | Notes                                                |
 | -------------------------- | -------------------- | ---------------------------------------------------- |
-| `PORT`                     | `3000`               | HTTP port inside the container                       |
+| `PORT`                     | `5500`               | HTTP port inside the container                       |
+| `TZ`                       | `Asia/Bangkok`       | Container timezone (affects cron + log timestamps)   |
 | `DATA_DIR`                 | `/data`              | SQLite + session storage                             |
 | `SESSION_SECRET`           | —                    | **Required.** Long random string                     |
 | `ADMIN_USERNAME`           | `admin`              | Used only on first boot                              |

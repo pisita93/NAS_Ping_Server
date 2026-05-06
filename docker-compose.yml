@@ -8,13 +8,13 @@ services:
     # image: ghcr.io/<your-user>/nas-ping-server:latest
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "5500:5500"
     volumes:
       # On Synology, point this at e.g. /volume1/docker/nas-ping-server
       - ./data:/data
     environment:
-      TZ: ${TZ:-Europe/Madrid}
-      PORT: 3000
+      TZ: ${TZ:-Asia/Bangkok}
+      PORT: 5500
       DATA_DIR: /data
       SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET}
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
