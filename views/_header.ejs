@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= typeof title !== 'undefined' ? title : 'NAS Ping Server' %></title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<% if (typeof user !== 'undefined' && user) { %>
+  <header class="topbar">
+    <a class="brand" href="/">NAS Ping Server</a>
+    <nav>
+      <a href="/">Jobs</a>
+      <a href="/jobs/new">New job</a>
+      <a href="/settings">Settings</a>
+      <form method="post" action="/logout" class="inline">
+        <button type="submit" class="link-btn">Logout (<%= user.username %>)</button>
+      </form>
+    </nav>
+  </header>
+<% } %>
+<main>

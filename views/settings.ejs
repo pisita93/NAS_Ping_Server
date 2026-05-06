@@ -1,0 +1,28 @@
+<%- include('_header', { title: 'Settings · NAS Ping Server', user: user }) %>
+<section class="card narrow">
+  <h1>Settings</h1>
+  <% if (message) { %><p class="ok-msg"><%= message %></p><% } %>
+  <% if (error) { %><p class="error"><%= error %></p><% } %>
+
+  <h2>Change password</h2>
+  <form method="post" action="/settings/password">
+    <label>Current password
+      <input name="current_password" type="password" autocomplete="current-password" required>
+    </label>
+    <label>New password (min 8 chars)
+      <input name="new_password" type="password" autocomplete="new-password" minlength="8" required>
+    </label>
+    <label>Confirm new password
+      <input name="confirm_password" type="password" autocomplete="new-password" minlength="8" required>
+    </label>
+    <button type="submit" class="primary">Update password</button>
+  </form>
+
+  <h2>Email notifications</h2>
+  <p class="muted small">
+    Configured via environment variables (SMTP_HOST, SMTP_USER, SMTP_PASS, NOTIFY_TO).
+    A failure email is sent every <code><%= process.env.NOTIFY_FAILURE_THRESHOLD || 2 %></code>
+    consecutive failures.
+  </p>
+</section>
+<%- include('_footer') %>

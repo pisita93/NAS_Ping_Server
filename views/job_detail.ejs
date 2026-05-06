@@ -1,0 +1,69 @@
+<%- include('_header', { title: job.name + ' · NAS Ping Server', user: user }) %>
+<section class="page-head">
+  <h1><%= job.name %></h1>
+  <div class="actions">
+    <form method="post" action="/jobs/<%= job.id %>/run" class="inline">
+      <button class="btn">Run now</button>
+    </form>
+    <form method="post" action="/jobs/<%= job.id %>/toggle" class="inline">
+      <button class="btn"><%= job.enabled ? 'Pause' : 'Resume' %></button>
+    </form>
+    <a class="btn" href="/jobs/<%= job.id %>/edit">Edit</a>
+  </div>
+</section>
+
+<section class="card">
+  <dl class="meta">
+    <dt>URL</dt><dd><%= job.method %> <%= job.url %></dd>
+    <dt>Schedule</dt><dd><code><%= job.schedule %></code></dd>
+    <dt>Next run</dt><dd><%= next_run_at ? next_run_at.toLocaleString() : '—' %></dd>
+    <dt>Expected status</dt><dd><%= job.expected_status %></dd>
+    <dt>Timeout</dt><dd><%= job.timeout_ms %> ms</dd>
+    <dt>Enabled</dt><dd><%= job.enabled ? 'Yes' : 'No (paused)' %></dd>
+    <dt>Consecutive failures</dt><dd><%= job.consecutive_failures %></dd>
+  </dl>
+</section>
+
+<section class="card">
+  <h2>Stats</h2>
+  <p>
+    Total runs: <%= stats.total || 0 %><br>
+    Successes: <%= stats.ok_count || 0 %>
+    (<%= stats.total ? Math.round(100 * (stats.ok_count || 0) / stats.total) : 0 %>%)<br>
+    Average duration: <%= stats.avg_duration ? Math.round(stats.avg_duration) : 0 %> ms
+  </p>
+</section>
+
+<section class="card">
+  <h2>Recent executions</h2>
+  <% if (executions.length === 0) { %>
+    <p class="muted">No runs yet.</p>
+  <% } else { %>
+  <table class="executions">
+    <thead>
+      <tr>
+        <th>When</th>
+        <th>Status</th>
+        <th>Code</th>
+        <th>Duration</th>
+        <th>Error</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% executions.forEach((e) => { %>
+      <tr>
+        <td><%= new Date(e.started_at).toLocaleString() %></td>
+        <td>
+          <% if (e.ok) { %><span class="badge ok">ok</span>
+          <% } else { %><span class="badge fail">fail</span><% } %>
+        </td>
+        <td><%= e.status_code ?? '—' %></td>
+        <td><%= e.duration_ms %> ms</td>
+        <td class="error-cell"><%= e.error || '' %></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</section>
+<%- include('_footer') %>

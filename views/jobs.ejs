@@ -1,0 +1,64 @@
+<%- include('_header', { title: 'Jobs · NAS Ping Server', user: user }) %>
+<section class="page-head">
+  <h1>Jobs</h1>
+  <a class="btn primary" href="/jobs/new">+ New job</a>
+</section>
+
+<% if (jobs.length === 0) { %>
+  <p class="muted">No jobs yet. Create one to start pinging.</p>
+<% } else { %>
+<table class="jobs">
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Name</th>
+      <th>Schedule</th>
+      <th>Last run</th>
+      <th>Next run</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  <% jobs.forEach((j) => { %>
+    <tr>
+      <td>
+        <% if (!j.enabled) { %>
+          <span class="badge off">paused</span>
+        <% } else if (j.last_execution && j.last_execution.ok) { %>
+          <span class="badge ok">ok</span>
+        <% } else if (j.last_execution) { %>
+          <span class="badge fail">fail</span>
+        <% } else { %>
+          <span class="badge muted">—</span>
+        <% } %>
+      </td>
+      <td><a href="/jobs/<%= j.id %>"><%= j.name %></a><br>
+        <span class="muted small"><%= j.method %> <%= j.url %></span></td>
+      <td><code><%= j.schedule %></code></td>
+      <td>
+        <% if (j.last_execution) { %>
+          <%= new Date(j.last_execution.started_at).toLocaleString() %>
+          <% if (j.last_execution.status_code) { %>
+            <span class="muted small">(<%= j.last_execution.status_code %>)</span>
+          <% } %>
+        <% } else { %>—<% } %>
+      </td>
+      <td>
+        <% if (j.next_run_at) { %>
+          <%= j.next_run_at.toLocaleString() %>
+        <% } else { %>—<% } %>
+      </td>
+      <td class="actions">
+        <form method="post" action="/jobs/<%= j.id %>/toggle" class="inline">
+          <button class="link-btn"><%= j.enabled ? 'Pause' : 'Resume' %></button>
+        </form>
+        <form method="post" action="/jobs/<%= j.id %>/run" class="inline">
+          <button class="link-btn">Run now</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+<% } %>
+<%- include('_footer') %>

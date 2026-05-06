@@ -1,0 +1,74 @@
+<%- include('_header', { title: (job && job.id ? 'Edit job' : 'New job') + ' · NAS Ping Server', user: user }) %>
+<section class="card">
+  <h1><%= job && job.id ? 'Edit job' : 'New job' %></h1>
+  <% if (error) { %><p class="error"><%= error %></p><% } %>
+
+  <% const j = job || {
+    name: '', url: '', method: 'GET', headers: {}, body: '',
+    schedule: '*/14 * * * *', timeout_ms: 15000, expected_status: 200, enabled: true
+  }; %>
+
+  <form method="post" action="<%= job && job.id ? '/jobs/' + job.id + '/edit' : '/jobs/new' %>">
+    <label>Name
+      <input name="name" value="<%= j.name %>" required>
+    </label>
+
+    <label>URL
+      <input name="url" value="<%= j.url %>" placeholder="https://my-app.onrender.com/healthz" required>
+    </label>
+
+    <div class="row">
+      <label>Method
+        <select name="method">
+          <% ['GET','POST','PUT','PATCH','DELETE','HEAD'].forEach((m) => { %>
+            <option value="<%= m %>" <%= j.method === m ? 'selected' : '' %>><%= m %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label>Expected status
+        <input name="expected_status" type="number" min="100" max="599" value="<%= j.expected_status %>">
+      </label>
+      <label>Timeout (ms)
+        <input name="timeout_ms" type="number" min="1000" max="120000" step="500" value="<%= j.timeout_ms %>">
+      </label>
+    </div>
+
+    <label>Schedule (cron expression — e.g. <code>*/14 * * * *</code> for every 14 minutes)
+      <input name="schedule" value="<%= j.schedule %>" required>
+    </label>
+    <details>
+      <summary class="muted small">Cron quick reference</summary>
+      <pre class="code">
+* * * * *           every minute
+*/10 * * * *        every 10 minutes
+*/14 * * * *        every 14 minutes (good for Render free tier)
+0 * * * *           top of every hour
+0 9 * * 1-5         9:00 weekdays
+      </pre>
+    </details>
+
+    <label>Headers (JSON, optional)
+      <textarea name="headers" rows="3" placeholder='{"Authorization":"Bearer ..."}'><%= typeof j.headers === 'object' ? JSON.stringify(j.headers) : (j.headers || '') %></textarea>
+    </label>
+
+    <label>Body (optional, ignored for GET/HEAD)
+      <textarea name="body" rows="3"><%= j.body || '' %></textarea>
+    </label>
+
+    <label class="checkbox">
+      <input type="checkbox" name="enabled" <%= j.enabled ? 'checked' : '' %>> Enabled
+    </label>
+
+    <div class="actions">
+      <button type="submit" class="primary">Save</button>
+      <a href="/" class="btn">Cancel</a>
+      <% if (job && job.id) { %>
+        <form method="post" action="/jobs/<%= job.id %>/delete" class="inline"
+              onsubmit="return confirm('Delete this job and all its history?')">
+          <button type="submit" class="danger">Delete</button>
+        </form>
+      <% } %>
+    </div>
+  </form>
+</section>
+<%- include('_footer') %>

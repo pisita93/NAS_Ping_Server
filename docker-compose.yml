@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  nas-ping-server:
+    container_name: nas-ping-server
+    build: .
+    # Or, after you publish an image, replace `build: .` with:
+    # image: ghcr.io/<your-user>/nas-ping-server:latest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      # On Synology, point this at e.g. /volume1/docker/nas-ping-server
+      - ./data:/data
+    environment:
+      TZ: ${TZ:-Europe/Madrid}
+      PORT: 3000
+      DATA_DIR: /data
+      SESSION_SECRET: ${SESSION_SECRET:?set SESSION_SECRET}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD on first boot}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_SECURE: ${SMTP_SECURE:-true}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      NOTIFY_FROM: ${NOTIFY_FROM:-}
+      NOTIFY_TO: ${NOTIFY_TO:-}
+      NOTIFY_FAILURE_THRESHOLD: ${NOTIFY_FAILURE_THRESHOLD:-2}
+      EXECUTION_RETENTION: ${EXECUTION_RETENTION:-1000}
+      PUBLIC_URL: ${PUBLIC_URL:-}

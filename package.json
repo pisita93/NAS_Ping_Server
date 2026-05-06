@@ -1,0 +1,26 @@
+{
+  "name": "nas-ping-server",
+  "version": "1.0.0",
+  "description": "Self-hosted cron-job-style pinger to keep Render.com (or any HTTP service) awake. Designed to run on a Synology NAS via Portainer.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "NODE_ENV=development node src/server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.3.0",
+    "connect-sqlite3": "^0.9.15",
+    "cron-parser": "^4.9.0",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "express-session": "^1.18.0",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.15",
+    "undici": "^6.20.0"
+  }
+}
