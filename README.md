@@ -26,90 +26,60 @@ npm start
 
 Open <http://localhost:5500> and sign in with the admin credentials from `.env`.
 
-## Deploy on Synology via Portainer
+## Deploy on Synology via Portainer (zero manual build)
 
-These steps assume Container Manager / Docker is installed and Portainer is running.
+The image is auto-built and published to GitHub Container Registry by the
+[`docker-publish.yml`](.github/workflows/docker-publish.yml) workflow on every
+push to a default/release branch. Portainer pulls that image directly — no SSH,
+no `docker build`, no file uploads to the NAS.
 
-### 1. Create a folder on the NAS
+### One-time setup (first deploy only)
 
-Via File Station (or SSH), create:
+1. **Push this repo to GitHub** (already done if you cloned this).
+2. **Wait for the first GitHub Actions run to finish** (Actions tab → green
+   check). It publishes `ghcr.io/pisita93/nas-ping-server:latest`.
+3. **Make the package public** so Portainer can pull it without auth:
+   - GitHub → your profile → **Packages** → `nas-ping-server`
+   - **Package settings** → **Change visibility** → **Public**
 
-```
-/volume1/docker/nas-ping-server/
-/volume1/docker/nas-ping-server/data/
-```
-
-The `data/` folder will hold the SQLite database and sessions.
-
-### 2. Copy the project to the NAS
-
-Either clone with `git`:
-
-```bash
-ssh admin@nas
-cd /volume1/docker/nas-ping-server
-git clone https://github.com/<you>/NAS_Ping_Server.git app
-```
-
-…or upload the project files via File Station to
-`/volume1/docker/nas-ping-server/app`.
-
-### 3. Create the `.env` file
-
-In `/volume1/docker/nas-ping-server/app/.env`:
-
-```env
-TZ=Asia/Bangkok
-SESSION_SECRET=<long random string>
-ADMIN_USERNAME=admin
-ADMIN_PASSWORD=<choose one — only used on first boot>
-
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=465
-SMTP_SECURE=true
-SMTP_USER=your.address@gmail.com
-SMTP_PASS=<gmail app password>
-NOTIFY_FROM=NAS Ping Server <your.address@gmail.com>
-NOTIFY_TO=your.address@gmail.com
-NOTIFY_FAILURE_THRESHOLD=2
-
-PUBLIC_URL=http://nas.local:5500
-```
-
-> **Gmail app password**: with 2-Step Verification enabled, generate one at
-> <https://myaccount.google.com/apppasswords>. Your normal Gmail password will
-> not work for SMTP.
-
-### 4. Deploy in Portainer
+### Deploy the stack in Portainer
 
 1. Portainer → **Stacks** → **Add stack**
-2. Name: `nas-ping-server`
-3. Build method: **Upload** (upload `docker-compose.yml`) **or** **Web editor**
-   (paste its contents).
-4. Under **Environment variables**, either click **Load variables from .env file**
-   and upload your `.env`, or paste each variable manually.
-5. Edit the `volumes:` line so the host path matches the NAS, e.g.:
+2. **Name:** `nas-ping-server`
+3. **Build method:** **Repository**
+4. Fill in:
+   - **Repository URL:** `https://github.com/pisita93/NAS_Ping_Server`
+   - **Repository reference:** `refs/heads/main` (or whichever branch you push to)
+   - **Compose path:** `docker-compose.yml`
+   - (Optional) Tick **Automatic updates** + **Re-pull image** so Portainer
+     redeploys whenever you push a new image to GHCR.
+5. Under **Environment variables**, add at minimum:
 
-   ```yaml
-   volumes:
-     - /volume1/docker/nas-ping-server/data:/data
-   ```
+   | Key | Example |
+   | --- | --- |
+   | `SESSION_SECRET` | `<long random string>` |
+   | `ADMIN_USERNAME` | `admin` |
+   | `ADMIN_PASSWORD` | `<your initial password>` |
+   | `SMTP_USER` | `you@gmail.com` |
+   | `SMTP_PASS` | `<gmail app password>` |
+   | `NOTIFY_FROM` | `NAS Ping Server <you@gmail.com>` |
+   | `NOTIFY_TO` | `you@gmail.com` |
+   | `PUBLIC_URL` | `http://nas.local:5500` |
+   | `DATA_PATH` | `/volume1/docker/nas-ping-server/data` *(recommended on Synology so backups are easy; omit to use a Docker-managed volume)* |
 
-6. Edit the `build: .` line: Portainer stacks built from the web editor cannot
-   build from a local folder. Two options:
-   - **Easiest** — push this repo to GitHub Container Registry / Docker Hub,
-     replace `build: .` with `image: ghcr.io/<you>/nas-ping-server:latest`.
-   - **Or** — build the image once on the NAS via SSH:
+   > **Gmail app password**: with 2-Step Verification enabled, generate one at
+   > <https://myaccount.google.com/apppasswords>. Your normal Gmail password
+   > will not work for SMTP.
 
-     ```bash
-     cd /volume1/docker/nas-ping-server/app
-     docker build -t nas-ping-server:local .
-     ```
-     then change the compose file to `image: nas-ping-server:local`.
+6. **Deploy the stack.** Browse to `http://<nas-ip>:5500` and log in.
 
-7. **Deploy the stack.** Browse to `http://<nas-ip>:5500` and log in.
+### Updating
 
-### 5. (Optional) Reverse proxy with HTTPS
+Push a new commit → GitHub Actions rebuilds → Portainer's automatic update
+re-pulls and recreates the container. Or click **Pull and redeploy** in
+Portainer manually.
+
+### (Optional) Reverse proxy with HTTPS
 
 Use Synology's built-in Reverse Proxy (Control Panel → Login Portal →
 Advanced → Reverse Proxy) to expose the app at e.g.

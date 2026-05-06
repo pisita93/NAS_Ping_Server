@@ -1,17 +1,28 @@
 version: "3.8"
 
+# Deploy via Portainer:
+#   Stacks → Add stack → Build method: Repository
+#   Repository URL:  https://github.com/pisita93/NAS_Ping_Server
+#   Compose path:    docker-compose.yml
+#   Set the env vars below in Portainer's "Environment variables" panel.
+#
+# The image is auto-built and published by GitHub Actions to:
+#   ghcr.io/pisita93/nas-ping-server:latest
+# Make the GHCR package public once after the first build (one-time step).
+
 services:
   nas-ping-server:
     container_name: nas-ping-server
-    build: .
-    # Or, after you publish an image, replace `build: .` with:
-    # image: ghcr.io/<your-user>/nas-ping-server:latest
+    image: ghcr.io/pisita93/nas-ping-server:latest
+    pull_policy: always
     restart: unless-stopped
     ports:
-      - "5500:5500"
+      - "${HOST_PORT:-5500}:5500"
     volumes:
-      # On Synology, point this at e.g. /volume1/docker/nas-ping-server
-      - ./data:/data
+      # DATA_PATH defaults to a Docker-managed named volume (works everywhere).
+      # On Synology, set DATA_PATH=/volume1/docker/nas-ping-server/data for
+      # easy file-station backups.
+      - ${DATA_PATH:-nas-ping-data}:/data
     environment:
       TZ: ${TZ:-Asia/Bangkok}
       PORT: 5500
@@ -29,3 +40,6 @@ services:
       NOTIFY_FAILURE_THRESHOLD: ${NOTIFY_FAILURE_THRESHOLD:-2}
       EXECUTION_RETENTION: ${EXECUTION_RETENTION:-1000}
       PUBLIC_URL: ${PUBLIC_URL:-}
+
+volumes:
+  nas-ping-data:
